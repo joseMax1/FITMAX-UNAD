@@ -9,7 +9,10 @@
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test --project=unit",
+    "test:e2e": "playwright test --project=escritorio --project=movil",
+    "mock:ia": "node tests/mocks/anthropic-simulado.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1",

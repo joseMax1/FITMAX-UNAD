@@ -98,7 +98,7 @@ export default function BienestarClient(p: Props) {
             className="w-full mt-1 px-3 py-2 rounded-lg bg-card2 border border-border text-sm text-white" />
         </label>
         {ESCALAS.map((s) => (
-          <div key={s.k}>
+          <div key={s.k} role="group" aria-label={s.label}>
             <div className="text-xs text-sub mb-1">{s.label}</div>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
