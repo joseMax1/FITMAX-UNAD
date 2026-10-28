@@ -1,26 +1,21 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { userIdApi } from "@/lib/session";
+import { leerJson, noAutenticado, pesoSchema } from "@/lib/validacion";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  const logs = await prisma.weightLog.findMany({
-    where: { userId: (session.user as any).id },
-    orderBy: { date: "asc" },
-  });
+  const userId = await userIdApi();
+  if (!userId) return noAutenticado();
+  const logs = await prisma.weightLog.findMany({ where: { userId }, orderBy: { date: "asc" } });
   return NextResponse.json(logs);
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  const userId = (session.user as any).id;
-  const peso = Number((await req.json()).peso);
-  if (!Number.isFinite(peso) || peso < 20 || peso > 400) {
-    return NextResponse.json({ error: "Ingresa un peso válido en kg" }, { status: 400 });
-  }
+  const userId = await userIdApi();
+  if (!userId) return noAutenticado();
+  const r = await leerJson(req, pesoSchema);
+  if ("error" in r) return r.error;
+  const { peso } = r.data;
 
   // El perfil se actualiza también, para que los macros y Claude usen el peso actual.
   const [log] = await prisma.$transaction([

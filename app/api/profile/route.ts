@@ -1,35 +1,28 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { userIdApi } from "@/lib/session";
+import { leerJson, noAutenticado, perfilSchema } from "@/lib/validacion";
+
+// Campos del perfil que se pueden devolver al navegador (nunca el hash de la contraseña).
+const PUBLICO = {
+  id: true, email: true, nombre: true, sexo: true, objetivo: true, edad: true, peso: true, altura: true, nivel: true,
+  diasSemana: true, xp: true, streak: true, lastTrainDate: true, createdAt: true,
+  pesoObjetivo: true, metaAguaMl: true, metaSuenoH: true, metaKcal: true, metaProteina: true,
+} as const;
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  const user = await prisma.user.findUnique({ where: { id: (session.user as any).id } });
+  const userId = await userIdApi();
+  if (!userId) return noAutenticado();
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: PUBLICO });
   if (!user) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
-  const { passwordHash, ...perfil } = user;
-  return NextResponse.json(perfil);
+  return NextResponse.json(user);
 }
 
 export async function PATCH(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  const body = await req.json();
-  const texto = ["nombre", "sexo", "objetivo", "nivel"];
-  const numeros = ["edad", "peso", "altura", "diasSemana", "metaAguaMl", "metaSuenoH"];
-  const opcionales = ["pesoObjetivo", "metaKcal", "metaProteina"]; // vacío = usar el valor calculado
-  const data: Record<string, unknown> = {};
-  for (const k of texto) if (typeof body[k] === "string" && body[k].trim()) data[k] = body[k].trim();
-  for (const k of numeros) if (k in body && body[k] !== "" && body[k] !== null && Number.isFinite(+body[k]) && +body[k] > 0) data[k] = k === "edad" || k === "diasSemana" ? Math.round(+body[k]) : +body[k];
-  for (const k of opcionales) {
-    if (!(k in body)) continue;
-    if (body[k] === "" || body[k] === null) data[k] = null;
-    else if (Number.isFinite(+body[k]) && +body[k] > 0) data[k] = k === "pesoObjetivo" ? +body[k] : Math.round(+body[k]);
-  }
-  if (typeof data.metaAguaMl === "number") data.metaAguaMl = Math.min(8000, Math.max(500, Math.round(data.metaAguaMl)));
-  if (typeof data.diasSemana === "number") data.diasSemana = Math.min(6, Math.max(2, data.diasSemana));
-
-  const { passwordHash, ...perfil } = await prisma.user.update({ where: { id: (session.user as any).id }, data });
-  return NextResponse.json(perfil);
+  const userId = await userIdApi();
+  if (!userId) return noAutenticado();
+  const r = await leerJson(req, perfilSchema);
+  if ("error" in r) return r.error;
+  const user = await prisma.user.update({ where: { id: userId }, data: r.data, select: PUBLICO });
+  return NextResponse.json(user);
 }

@@ -408,17 +408,14 @@ function ModoEntrenamiento({ dia, historial, onExit }: { dia: DiaRutina; histori
   const router = useRouter();
   const ej = ejercicios[idx];
 
+  const enDescanso = descansando > 0;
   useEffect(() => {
-    if (descansando > 0) {
-      timerRef.current = setInterval(() => {
-        setDescansando((s) => {
-          if (s <= 1) { if (timerRef.current) clearInterval(timerRef.current); return 0; }
-          return s - 1;
-        });
-      }, 1000);
-      return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }
-  }, [descansando > 0]);
+    if (!enDescanso) return;
+    timerRef.current = setInterval(() => {
+      setDescansando((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [enDescanso]);
 
   function irA(i: number) {
     setIdx(i);

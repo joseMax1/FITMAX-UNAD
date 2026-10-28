@@ -101,7 +101,7 @@ export default async function DashboardPage() {
 
       <div className="rounded-2xl p-4 bg-card2 border border-border">
         <div className="text-xs uppercase tracking-wide font-semibold mb-1 text-sub">Mentalidad</div>
-        <div className="text-sm italic">"{frase}"</div>
+        <div className="text-sm italic">&ldquo;{frase}&rdquo;</div>
       </div>
 
       <Link href="/ia" className="w-full flex items-center justify-between rounded-2xl p-4 bg-card border border-border">

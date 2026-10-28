@@ -1,7 +1,7 @@
 export function calcularMacros(p: { peso: number; altura: number; edad: number; sexo: string; objetivo: string; diasSemana: number }) {
   const bmr = 10 * p.peso + 6.25 * p.altura - 5 * p.edad + (p.sexo === "H" ? 5 : -161);
   const factorActividad = p.diasSemana >= 5 ? 1.55 : p.diasSemana >= 3 ? 1.4 : 1.25;
-  let tdee = bmr * factorActividad;
+  const tdee = bmr * factorActividad;
   let ajuste = 1;
   if (p.objetivo.includes("Hipertrofia")) ajuste = 1.1;
   else if (p.objetivo.includes("Definición")) ajuste = 0.82;
