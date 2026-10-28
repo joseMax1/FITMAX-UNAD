@@ -1,0 +1,22 @@
+# Dependencias
+node_modules/
+# Compilación de Next.js
+.next/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+# Variables de entorno y secretos (nunca subir)
+.env
+.env.*
+!.env.example
+# Pruebas y reportes
+/test-results/
+/playwright-report/
+/coverage/
+# Sistema y editores
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

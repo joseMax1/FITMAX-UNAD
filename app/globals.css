@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background-color: #101114;
+  color: #F3F1EC;
+}
+
+input, select {
+  color: inherit;
+}

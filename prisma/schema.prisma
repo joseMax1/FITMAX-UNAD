@@ -1,0 +1,292 @@
+// FITMAX - esquema para las 6 áreas (Dashboard, Entrenamiento, Nutrición, Progreso, Claude y
+// Bienestar). Compatible con los datos de la versión anterior: solo agrega tablas y columnas.
+//
+// Convención de fechas: los registros "por día" (comidas, agua, bienestar) guardan `fecha` como
+// texto "YYYY-MM-DD" calculado en la zona APP_TZ. Así "hoy" no cambia según el reloj UTC del servidor.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Usuario ─────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  nombre        String
+  sexo          String    @default("H")
+  objetivo      String    @default("Hipertrofia")
+  edad          Int       @default(25)
+  peso          Float     @default(70)
+  altura        Float     @default(170)
+  nivel         String    @default("Intermedio")
+  diasSemana    Int       @default(4)
+  xp            Int       @default(0)
+  streak        Int       @default(0)
+  lastTrainDate DateTime?
+  createdAt     DateTime  @default(now())
+
+  // NUEVO: metas que alimentan el Dashboard
+  pesoObjetivo  Float?
+  metaAguaMl    Int       @default(2500)
+  metaSuenoH    Float     @default(8)
+  // Si es null se usan los macros calculados por calcularMacros()
+  metaKcal      Int?
+  metaProteina  Int?
+  updatedAt     DateTime  @default(now()) @updatedAt
+
+  weightLogs    WeightLog[]
+  workoutLogs   WorkoutLog[]
+  chatMessages  ChatMessage[]
+  routines      Routine[]
+  exercises     Exercise[]       // ejercicios personalizados
+  foods         Food[]           // alimentos personalizados
+  meals         MealLog[]
+  measurements  BodyMeasurement[]
+  waterLogs     WaterLog[]
+  wellness      WellnessLog[]
+}
+
+// ─────────────────────────── Entrenamiento ───────────────────────────
+
+/// Biblioteca de ejercicios. userId = null => ejercicio global (seed desde lib/exercises.ts);
+/// userId con valor => ejercicio creado por ese usuario.
+model Exercise {
+  id               String   @id @default(cuid())
+  slug             String   // ej. "press_banca"
+  nombre           String
+  grupo            String   // Pecho, Espalda, Cuádriceps...
+  equipo           String
+  dificultad       String
+  seriesSugeridas  Int      @default(3)
+  repsSugeridas    String   @default("8-12")
+  descansoSeg      Int      @default(90)
+  tip              String   @default("")
+  videoUrl         String?
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  routineItems     RoutineExercise[]
+  sets             SetLog[]
+
+  @@unique([slug, userId])
+  @@index([grupo])
+}
+
+/// Rutina del usuario (reemplaza el split fijo de SPLITS cuando el usuario la personaliza).
+model Routine {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nombre    String
+  activa    Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  dias      RoutineDay[]
+
+  @@index([userId])
+}
+
+model RoutineDay {
+  id          String            @id @default(cuid())
+  routineId   String
+  routine     Routine           @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  diaSemana   Int               // 0 = lunes ... 6 = domingo
+  nombre      String            // "Pecho + Tríceps"
+  ejercicios  RoutineExercise[]
+  workoutLogs WorkoutLog[]
+
+  @@unique([routineId, diaSemana])
+}
+
+model RoutineExercise {
+  id           String     @id @default(cuid())
+  routineDayId String
+  routineDay   RoutineDay @relation(fields: [routineDayId], references: [id], onDelete: Cascade)
+  exerciseId   String
+  exercise     Exercise   @relation(fields: [exerciseId], references: [id])
+  orden        Int
+  series       Int
+  reps         String
+  descansoSeg  Int
+
+  @@index([routineDayId])
+}
+
+/// Sesión de entrenamiento (ya existe; se agregan columnas opcionales).
+model WorkoutLog {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime    @default(now())
+  dia          String
+  sets         SetLog[]
+
+  // NUEVO
+  routineDayId String?
+  routineDay   RoutineDay? @relation(fields: [routineDayId], references: [id], onDelete: SetNull)
+  duracionMin  Int?
+  notas        String?
+  rpeSesion    Int?        // esfuerzo percibido 1-10
+
+  @@index([userId, date])
+}
+
+model SetLog {
+  id           String     @id @default(cuid())
+  workoutLogId String
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  ejercicio    String     // se mantiene el nombre para no romper el historial
+  kg           Float
+  reps         Int
+  orden        Int
+
+  // NUEVO
+  exerciseId   String?
+  exercise     Exercise?  @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  rpe          Int?
+
+  @@index([workoutLogId])
+  @@index([exerciseId])
+}
+
+// ───────────────────────────── Nutrición ─────────────────────────────
+
+/// Base de alimentos. Macros por cada 100 g; `porcion`/`gramos` es la porción típica sugerida.
+/// userId = null => alimento global.
+model Food {
+  id        String     @id @default(cuid())
+  nombre    String
+  porcion   String     @default("100 g")
+  gramos    Float      @default(100)
+  kcal      Float
+  proteina  Float
+  carbos    Float
+  grasa     Float
+  fibra     Float?
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     MealItem[]
+
+  @@index([nombre])
+}
+
+enum MealType {
+  DESAYUNO
+  ALMUERZO
+  CENA
+  SNACK
+  PRE_ENTRENO
+  POST_ENTRENO
+}
+
+model MealLog {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fecha     String     // "YYYY-MM-DD" en APP_TZ
+  tipo      MealType
+  createdAt DateTime   @default(now())
+  items     MealItem[]
+
+  @@index([userId, fecha])
+}
+
+/// Copia los macros al momento de registrar, para que editar un alimento no cambie el historial.
+model MealItem {
+  id        String  @id @default(cuid())
+  mealLogId String
+  mealLog   MealLog @relation(fields: [mealLogId], references: [id], onDelete: Cascade)
+  foodId    String?
+  food      Food?   @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  nombre    String
+  gramos    Float
+  kcal      Float
+  proteina  Float
+  carbos    Float
+  grasa     Float
+
+  @@index([mealLogId])
+}
+
+// ───────────────────────────── Progreso ─────────────────────────────
+
+model WeightLog {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date   DateTime @default(now())
+  peso   Float
+
+  @@index([userId, date])
+}
+
+/// Medidas corporales en cm (todas opcionales: se registra lo que se mida ese día).
+model BodyMeasurement {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime @default(now())
+  cintura   Float?
+  cadera    Float?
+  pecho     Float?
+  brazo     Float?
+  muslo     Float?
+  cuello    Float?
+  grasaPct  Float?
+
+  @@index([userId, date])
+}
+
+// ───────────────────────────── Bienestar ─────────────────────────────
+
+model WaterLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fecha     String   // "YYYY-MM-DD" en APP_TZ
+  ml        Int
+  createdAt DateTime @default(now())
+
+  @@index([userId, fecha])
+}
+
+/// Check-in diario de recuperación (uno por día). Escalas 1-5.
+model WellnessLog {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fecha         String   // "YYYY-MM-DD" en APP_TZ
+  horasSueno    Float?
+  calidadSueno  Int?
+  energia       Int?
+  estres        Int?
+  dolorMuscular Int?
+  notas         String?
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, fecha])
+}
+
+// ────────────────────────────── Claude ──────────────────────────────
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      String   // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+
+  // NUEVO: qué modelo respondió y cuánto consumió (para controlar el costo)
+  model         String?
+  inputTokens   Int?
+  outputTokens  Int?
+
+  @@index([userId, createdAt])
+}
