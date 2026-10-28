@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { userIdApi } from "@/lib/session";
 import { asegurarCatalogo } from "@/lib/seed";
+import { normalizar } from "@/lib/texto";
 
 const noAuth = () => NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
@@ -9,23 +10,20 @@ export async function GET(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
   await asegurarCatalogo();
-  const q = (new URL(req.url).searchParams.get("q") || "").trim();
+  const q = normalizar((new URL(req.url).searchParams.get("q") || "").slice(0, 60));
+  // El catálogo es pequeño (70 globales + propios): se filtra en memoria para ignorar tildes.
   const alimentos = await prisma.food.findMany({
-    where: {
-      OR: [{ userId: null }, { userId }],
-      ...(q ? { nombre: { contains: q, mode: "insensitive" as const } } : {}),
-    },
+    where: { OR: [{ userId: null }, { userId }] },
     orderBy: { nombre: "asc" },
-    take: 50,
   });
-  return NextResponse.json(alimentos);
+  return NextResponse.json((q ? alimentos.filter((a) => normalizar(a.nombre).includes(q)) : alimentos).slice(0, 50));
 }
 
 /** Alimento personalizado. Macros por 100 g. */
 export async function POST(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => null)) ?? {};
   const nombre = typeof b.nombre === "string" ? b.nombre.trim() : "";
   const nums = ["kcal", "proteina", "carbos", "grasa"].map((k) => Number(b[k]));
   if (!nombre || nums.some((n) => !Number.isFinite(n) || n < 0)) {

@@ -101,7 +101,7 @@ export default function IAClient({ initialMessages }: { initialMessages: Msg[] }
       <div className="flex gap-2 mt-2 mb-4">
         <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && enviar()}
           placeholder="Pregúntale a Claude…" className="flex-1 px-3 py-2 rounded-lg bg-card2 border border-border" />
-        <button onClick={enviar} disabled={sending || !input.trim()} className="px-4 rounded-lg text-white font-bold bg-accent disabled:opacity-40"><Send size={16} /></button>
+        <button onClick={enviar} aria-label="Enviar" disabled={sending || !input.trim()} className="px-4 rounded-lg text-white font-bold bg-accent disabled:opacity-40"><Send size={16} /></button>
       </div>
     </div>
   );

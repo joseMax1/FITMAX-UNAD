@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => null)) ?? {};
   const ml = Math.round(Number(b.ml));
   if (!Number.isFinite(ml) || ml <= 0 || ml > 3000) return NextResponse.json({ error: "Cantidad inválida" }, { status: 400 });
   const registro = await prisma.waterLog.create({ data: { userId, ml, fecha: claveDia() } });

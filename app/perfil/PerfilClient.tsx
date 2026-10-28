@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 type Perfil = {
   nombre: string; email: string; sexo: string; objetivo: string; edad: number; peso: number; altura: number; nivel: string; diasSemana: number;
@@ -24,6 +25,18 @@ export default function PerfilClient({ perfil, calculado }: { perfil: Perfil; ca
       ? "Guardado ✓. Cambiaste los días por semana: actualiza tu rutina en Entrenar → Rutina."
       : "Guardado ✓");
     router.refresh();
+  }
+
+  const [borrando, setBorrando] = useState(false);
+  const [clave, setClave] = useState("");
+  const [estadoBorrar, setEstadoBorrar] = useState("");
+
+  async function eliminarCuenta() {
+    setEstadoBorrar("Eliminando…");
+    const res = await fetch("/api/cuenta", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: clave }) }).catch(() => null);
+    if (!res) return setEstadoBorrar("Sin conexión. Intenta de nuevo.");
+    if (!res.ok) return setEstadoBorrar((await res.json().catch(() => null))?.error ?? "No se pudo eliminar.");
+    await signOut({ callbackUrl: "/login" });
   }
 
   const input = "w-full mt-1 px-3 py-2 rounded-lg bg-card2 border border-border text-sm text-white";
@@ -70,6 +83,24 @@ export default function PerfilClient({ perfil, calculado }: { perfil: Perfil; ca
 
       <button onClick={guardar} className="w-full py-3 rounded-xl font-bold bg-accent text-white">Guardar cambios</button>
       {estado && <div className="text-sm text-center text-sub">{estado}</div>}
+
+      <h2 className="text-lg font-black uppercase">Mis datos</h2>
+      <div className="rounded-2xl p-4 bg-card border border-border space-y-3">
+        <a href="/api/cuenta" download className="block w-full py-2 rounded-xl text-center text-sm font-bold bg-card2 border border-border">Descargar mis datos (JSON)</a>
+        {!borrando ? (
+          <button onClick={() => setBorrando(true)} className="w-full py-2 rounded-xl text-sm font-bold text-red-400 border border-red-400/40">Eliminar mi cuenta</button>
+        ) : (
+          <div className="space-y-2">
+            <div className="text-xs text-sub">Se borrarán tu perfil, entrenamientos, comidas, medidas, bienestar y chat. No se puede deshacer. Escribe tu contraseña para confirmar.</div>
+            <input className={input} type="password" autoComplete="current-password" placeholder="Contraseña" value={clave} onChange={(e) => { setClave(e.target.value); setEstadoBorrar(""); }} />
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => { setBorrando(false); setClave(""); setEstadoBorrar(""); }} className="py-2 rounded-xl text-sm bg-card2 border border-border">Cancelar</button>
+              <button onClick={eliminarCuenta} disabled={!clave} className="py-2 rounded-xl text-sm font-bold bg-red-500 text-white disabled:opacity-40">Eliminar definitivamente</button>
+            </div>
+            {estadoBorrar && <div className="text-sm text-center text-red-400">{estadoBorrar}</div>}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

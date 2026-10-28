@@ -37,7 +37,7 @@ export default function RegisterPage() {
         <form onSubmit={onSubmit} className="space-y-3">
           <input className="w-full px-3 py-2 rounded-lg bg-card2 border border-border" placeholder="Nombre" value={form.nombre} onChange={(e) => set("nombre", e.target.value)} required />
           <input className="w-full px-3 py-2 rounded-lg bg-card2 border border-border" type="email" placeholder="Correo" value={form.email} onChange={(e) => set("email", e.target.value)} required />
-          <input className="w-full px-3 py-2 rounded-lg bg-card2 border border-border" type="password" placeholder="Contraseña" value={form.password} onChange={(e) => set("password", e.target.value)} required minLength={6} />
+          <input className="w-full px-3 py-2 rounded-lg bg-card2 border border-border" type="password" placeholder="Contraseña (mínimo 8 caracteres)" value={form.password} onChange={(e) => set("password", e.target.value)} required minLength={8} maxLength={72} />
           <div className="flex gap-2">
             {["H", "M"].map((s) => (
               <button type="button" key={s} onClick={() => set("sexo", s)}

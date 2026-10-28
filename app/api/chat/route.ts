@@ -6,6 +6,7 @@ import { CLAUDE_MODEL, getClaude, normalizarHistorial, MensajeChat } from "@/lib
 import { rutinaActiva, diaDeRutina } from "@/lib/rutina";
 import { resumenHoy, recuperacion } from "@/lib/resumen";
 import { claveDia } from "@/lib/fecha";
+import { permitir } from "@/lib/limite";
 
 // Separador entre el texto de Claude y un aviso de error al final del stream.
 const MARCA_ERROR = "\u0000";
@@ -40,8 +41,8 @@ async function contextoUsuario(userId: string) {
   return `Eres Claude, el asistente de entrenamiento, nutrición y bienestar dentro de la app FITMAX. Hablas en español, con tono cercano y directo, basado en evidencia. No inventas estudios ni recomiendas sustancias dopantes. No reemplazas a un médico, nutricionista ni fisioterapeuta: ante dolor, lesiones o síntomas preocupantes, recomienda evaluación profesional.
 Responde breve y concreto. Usa texto plano; para listas usa guiones simples.
 
-Datos del usuario (fecha de hoy ${r.fecha}):
-- Nombre: ${user.nombre} · sexo ${user.sexo} · ${user.edad} años · ${r.peso} kg${user.pesoObjetivo ? ` (objetivo ${user.pesoObjetivo} kg)` : ""} · ${user.altura} cm
+Datos del usuario (fecha de hoy ${r.fecha}). Solo se envía lo necesario para personalizar: sin nombre, correo ni identificadores.
+- Sexo ${user.sexo} · ${user.edad} años · ${r.peso} kg${user.pesoObjetivo ? ` (objetivo ${user.pesoObjetivo} kg)` : ""} · ${user.altura} cm
 - Objetivo: ${user.objetivo} · nivel ${user.nivel}
 - Rutina semanal: ${semana || "sin días configurados"}
 - Hoy (${hoy.nombre}): ${r.entrenoHoy ? "ya entrenó" : hoy.dia ? `toca ${hoy.dia.nombre} (${hoy.dia.ejercicios.map((e) => `${e.exercise.nombre} ${e.series}x${e.reps}`).join(", ")})` : "descanso"}
@@ -54,10 +55,14 @@ Datos del usuario (fecha de hoy ${r.fecha}):
 export async function POST(req: Request) {
   const userId = await userIdApi();
   if (!userId) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  const { message } = await req.json().catch(() => ({}));
+  const { message } = (await req.json().catch(() => null)) ?? {};
   const texto = typeof message === "string" ? message.trim() : "";
   if (!texto) return NextResponse.json({ error: "Falta el mensaje" }, { status: 400 });
   if (texto.length > 4000) return NextResponse.json({ error: "El mensaje es demasiado largo" }, { status: 400 });
+  // Controla el costo de la API: máximo 20 preguntas cada 10 minutos por usuario.
+  if (!permitir(`chat:${userId}`, 20, 10 * 60 * 1000)) {
+    return NextResponse.json({ error: "Hiciste muchas preguntas seguidas. Espera unos minutos." }, { status: 429 });
+  }
 
   const claude = getClaude();
   if (!claude) {

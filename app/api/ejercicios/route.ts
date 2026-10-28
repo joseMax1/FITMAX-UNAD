@@ -19,7 +19,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => null)) ?? {};
   const nombre = typeof b.nombre === "string" ? b.nombre.trim() : "";
   const grupo = typeof b.grupo === "string" ? b.grupo.trim() : "";
   if (!nombre || !grupo) return NextResponse.json({ error: "Nombre y grupo muscular son obligatorios" }, { status: 400 });

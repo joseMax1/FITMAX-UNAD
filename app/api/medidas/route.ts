@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => null)) ?? {};
   const data: Partial<Record<(typeof CAMPOS)[number], number>> = {};
   for (const k of CAMPOS) {
     if (b[k] === "" || b[k] == null) continue;

@@ -18,7 +18,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => null)) ?? {};
   const escala = (v: unknown) => {
     const n = Math.round(Number(v));
     return v === null || v === undefined || v === "" || !Number.isFinite(n) ? null : Math.min(5, Math.max(1, n));

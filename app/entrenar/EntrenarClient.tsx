@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronLeft, ArrowLeft, Check, Plus, Trash2, ArrowUp, ArrowDown, Trophy, Play } from "lucide-react";
 import Tabs from "@/components/Tabs";
+import { normalizar } from "@/lib/texto";
 import { DIAS_SEMANA } from "@/lib/exercises";
 
 export type EjercicioRutina = {
@@ -308,7 +309,7 @@ function Biblioteca({ biblioteca, historial }: { biblioteca: EjercicioLib[]; his
   const [nuevo, setNuevo] = useState<NuevoEjercicio | null>(null);
   const [error, setError] = useState("");
   const grupos = ["Todos", ...Array.from(new Set(biblioteca.map((e) => e.grupo)))];
-  const lista = biblioteca.filter((e) => (grupo === "Todos" || e.grupo === grupo) && e.nombre.toLowerCase().includes(q.toLowerCase()));
+  const lista = biblioteca.filter((e) => (grupo === "Todos" || e.grupo === grupo) && normalizar(e.nombre).includes(normalizar(q)));
 
   async function crear() {
     if (!nuevo) return;

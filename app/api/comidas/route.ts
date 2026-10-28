@@ -23,7 +23,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const userId = await userIdApi();
   if (!userId) return noAuth();
-  const b = await req.json().catch(() => ({}));
+  const b = (await req.json().catch(() => null)) ?? {};
   const fecha = claveValida(b.fecha);
   const tipo = b.tipo as MealType;
   const gramos = Number(b.gramos);
