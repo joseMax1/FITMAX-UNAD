@@ -1,6 +1,6 @@
 # Verificación final y lista de chequeo (Fase 4)
 
-Fecha: 30 de octubre de 2026. Versión 0.4.1. Código probado: commit `cc6728f`, en una copia limpia
+Fecha: 30 de octubre de 2026. Versión 0.4.1. Código probado: commit `987c6cc`, en una copia limpia
 del repositorio (`git clone`) y una base de datos nueva. Verificación anterior: 28/10/2026, versión
 0.4.0, commit `1329b81`, 61 de 61 pruebas.
 

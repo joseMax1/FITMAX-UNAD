@@ -39,8 +39,8 @@ Salidas: `playwright-report/` (reporte HTML), `test-results/resultados.json` (re
 
 | Campo | Valor |
 |---|---|
-| Fecha y hora | 30 de octubre de 2026, pruebas de punta a punta desde 22:32:09 UTC (17:32 hora Colombia), duración 66 s |
-| Versión | 0.4.1, commit `cc6728f`, en una copia limpia del repositorio (`git clone`) |
+| Fecha y hora | 30 de octubre de 2026, pruebas de punta a punta desde 22:40:55 UTC (17:40 hora Colombia), duración 67 s |
+| Versión | 0.4.1, commit `987c6cc`, en una copia limpia del repositorio (`git clone`) |
 | Sistema | Linux 6.18 (contenedor de desarrollo en la nube), Node.js 22.22.0 |
 | Base de datos | PostgreSQL 16.15 local, base nueva y vacía `fitmax_v4` creada con `prisma migrate deploy` (migraciones `0_init` y `1_fotos_progreso`) |
 | Navegador | Chromium 141.0.7390.37 (Playwright 1.56.1), sin interfaz gráfica |
@@ -76,7 +76,7 @@ Estado: **Aprobado** = se ejecutó y se cumplió todo lo esperado en escritorio 
 | CP-07 | Nutrición: Agregar en Desayuno, buscar "frijoles", elegir "Fríjoles rojos cocidos", 200 g, agregar, recargar. Enviar gramos negativos | Vista previa 254 kcal; total del día 254; persiste; la API rechaza con 400 | Igual a lo esperado | Aprobado | CP-07 |
 | CP-08 | Progreso: peso "abc", luego 61,5 y 61; Medidas: cintura 72 y grasa 24,5; recargar. Fotos: subir una imagen sintética con nota "Semana 1"; enviar un archivo que no es imagen; borrar la foto | Error con "abc"; peso actual 61 kg y gráfica; medidas en el historial; perfil con peso 61; "Foto guardada ✓" y la imagen se muestra; el archivo falso se rechaza con 400; la foto se borra | Igual a lo esperado | Aprobado | CP-08 (3 capturas) |
 | CP-09 | Bienestar: +250 y +500 ml; check-in 7,5 h, calidad 4, energía 4, estrés 2, dolor 2; guardar; recargar. Enviar 99 999 ml | 750 / 2500 ml; "Check-in guardado ✓"; puntaje 4 / 5; la API rechaza la cantidad | Igual a lo esperado | Aprobado | CP-09 |
-| CP-10 | Chat: pregunta normal, recargar; revisar la petición enviada; mensaje que provoca rechazo; mensaje que provoca 401; mensaje vacío y de 4001 caracteres; instancia sin API key | Respuesta en streaming guardada; la petición no incluye nombre, correo ni id; avisos claros sin detalles internos; la pregunta vuelve al campo; 400 en entradas inválidas; aviso de configuración sin clave | Igual a lo esperado. El historial guarda solo la conversación exitosa | Aprobado (con simulador) | CP-10a, CP-10b, CP-10c |
+| CP-10 | Chat: pregunta normal, recargar; revisar la petición enviada; mensaje que provoca rechazo; mensaje que provoca 401; mensaje vacío y de 4001 caracteres; instancia sin API key | Respuesta en streaming guardada; aviso visible de qué datos recibe el asistente; la petición no incluye nombre, correo ni id; avisos claros sin detalles internos; la pregunta vuelve al campo; 400 en entradas inválidas; aviso de configuración sin clave | Igual a lo esperado. El historial guarda solo la conversación exitosa | Aprobado (con simulador) | CP-10a, CP-10b, CP-10c |
 | CP-11 | Con sesión, abrir las 7 pantallas en escritorio y en móvil | Sin desbordes horizontales; barra inferior visible | Ancho del contenido ≤ ancho de la vista en las 14 combinaciones | Aprobado | CP-11 (7 capturas por dispositivo) |
 | CP-12 | Usuaria A crea alimento, comida, ejercicio, medida, agua y una foto de progreso. Usuario B intenta borrarlos, verlos y usarlos; exporta sus datos; prueba /admin, /api/admin, /api/users; borra su cuenta con clave incorrecta y correcta | B recibe 404 (también al ver o borrar la foto de A) y los datos de A siguen intactos; B no ve ni usa datos de A; su exportación solo tiene datos suyos; no hay rutas administrativas; borrar exige la contraseña y no afecta a A | Igual a lo esperado | Aprobado (adaptado) | Reporte HTML |
 

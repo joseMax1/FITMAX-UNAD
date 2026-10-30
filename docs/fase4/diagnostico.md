@@ -80,6 +80,7 @@ Severidad: Crítica (explotable de forma remota o pérdida de datos), Alta, Medi
 | 16 | Pestañas y escalas sin semántica accesible | `components/Tabs.tsx`, `BienestarClient.tsx`, `IAClient.tsx` | Baja | Lectores de pantalla no las anuncian | `role="tab"`, `aria-selected`, `role="group"`, etiqueta "Enviar" | CP-04, CP-09, CP-10 |
 | 17 | Fotos de progreso (RF-08 de la Fase 3) no estaban implementadas | nuevo `app/api/fotos/*`, `app/progreso/Fotos.tsx`, migración `1_fotos_progreso` | Media | Requisito de la Fase 3 sin cubrir | Subida con verificación del tipo real del archivo (JPEG, PNG, WebP), reducción a 1080 px en el navegador (elimina metadatos EXIF como la ubicación), máximo 1,5 MB y 60 fotos, acceso solo del dueño, `no-store`; no se envían al asistente; se borran con la cuenta | CP-08, CP-12 |
 | 18 | El historial de Git registraba un correo personal como autor | `.git` | Baja | Dato personal visible al publicar el repositorio | Historial local (no publicado) reescrito con un autor genérico `Equipo FITMAX <equipo-fitmax@example.invalid>` | `git log --format='%an %ae'` |
+| 19 | El chat no informaba qué datos personales recibe el asistente (sexo, edad, peso, estatura, objetivo y registros del día) | `app/ia/IAClient.tsx` | Media | El usuario no conoce la finalidad del envío a un tercero (Ley 1581 de 2012; sección 6.3 de la Fase 3) | Aviso permanente bajo el campo de mensaje: qué se envía, qué no (nombre, correo, fotos) y que las respuestas son orientativas. Queda pendiente decidir si se pide autorización explícita antes del primer uso | CP-10 |
 
 ## 3. Riesgos que siguen abiertos
 
@@ -88,6 +89,9 @@ Severidad: Crítica (explotable de forma remota o pérdida de datos), Alta, Medi
    (Neon: Reset password; Anthropic: revocar y crear una nueva key) antes de publicar o entregar.
 2. Límite de intentos por instancia (categoría C).
 3. Respuesta real del modelo sin prueba (categoría B).
+4. El asistente recibe datos que la Ley 1581 de 2012 puede considerar sensibles (peso, estatura y
+   hábitos de salud). Hay aviso informativo, pero no un registro de autorización explícita. **Decisión
+   del equipo:** pedir esa autorización antes del primer uso del chat o reducir los datos enviados.
 
 ## 4. Cambios frente a lo previsto en la Fase 3
 

@@ -35,7 +35,7 @@ eran de dos semanas; la tabla registra los incrementos reales, no ceremonias que
 | I2 | 9 oct 2026 | Diseñar / Implementar | Modelo de datos de 6 áreas; Dashboard, Entrenar, Nutrición, Progreso, Bienestar, Claude y Perfil | Versión 2 (incluida en el commit base) |
 | I3 | 9 a 11 oct 2026 | Operar | Soporte de instalación en Windows (`DATABASE_URL`) | `iniciar.bat` corregido |
 | I4 | 28 oct 2026 | Implementar / Operar | Seguridad (RNF-02), validación (RNF-03), privacidad (RNF-06), migraciones (RNF-05), pruebas CP-01 a CP-12 | Commits `eb164f4` a `2c18f60`; 61/61 pruebas |
-| I5 | 30 oct 2026 | Implementar / Operar | RF-08 fotos de progreso; prueba por interfaz del modo entrenamiento (CP-04b); alineación con la Fase 3; anonimización del historial de Git | Commits `89786b6` y siguientes; `docs/pruebas.md` |
+| I5 | 30 oct 2026 | Implementar / Operar | RF-08 fotos de progreso; prueba por interfaz del modo entrenamiento (CP-04b); aviso de datos enviados a la IA; alineación con la Fase 3; anonimización del historial de Git | Commits `89786b6` a `987c6cc`; `docs/pruebas.md` |
 
 ## Incrementos planeados (no ejecutados)
 
