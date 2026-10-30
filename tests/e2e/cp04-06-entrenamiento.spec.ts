@@ -90,3 +90,29 @@ test("CP-06 buscar y filtrar ejercicios", async ({ page }, info) => {
   await expect(tarjetas).toHaveCount(0);
   await evidencia(page, info, "CP-06-filtro-grupo");
 });
+
+test("CP-04b registrar una sesión completa en el modo entrenamiento", async ({ page }, info) => {
+  const u = await crearUsuario();
+  await iniciarSesion(page, u);
+  await page.goto("/entrenar");
+  await page.getByRole("button", { name: /^Lunes/ }).click();
+  await page.getByRole("button", { name: "Iniciar modo entrenamiento" }).click();
+
+  await page.getByPlaceholder("kg").fill("40");
+  await page.getByPlaceholder("reps").fill("10");
+  await page.getByRole("button", { name: "Registrar serie" }).click();
+  await expect(page.getByRole("button", { name: "Saltar descanso" })).toBeVisible(); // cronómetro de descanso
+  await page.getByRole("button", { name: "Saltar descanso" }).click();
+  await evidencia(page, info, "CP-04b-modo-entrenamiento");
+
+  while (await page.getByRole("button", { name: "Siguiente ejercicio" }).isVisible()) {
+    await page.getByRole("button", { name: "Siguiente ejercicio" }).click();
+  }
+  await page.getByRole("button", { name: "Terminar", exact: true }).click();
+  await page.getByRole("button", { name: "Guardar entrenamiento" }).click();
+
+  const mes = claveDia().slice(0, 7);
+  await expect.poll(async () => (await (await page.request.get(`/api/workouts?mes=${mes}`)).json()).length).toBe(1);
+  const [sesion] = await (await page.request.get(`/api/workouts?mes=${mes}`)).json();
+  expect(sesion.sets).toEqual([expect.objectContaining({ kg: 40, reps: 10 })]);
+});
