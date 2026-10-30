@@ -3,52 +3,52 @@
 Estado: **instrumento preparado, sin aplicar.** No hay participantes ni resultados todavía. Los
 resultados se registran en `usabilidad-sus-resultados.xlsx` solo con datos reales.
 
-## 1. Procedimiento
+## 1. Procedimiento (sección 8.8 y anexo D de la Fase 3)
 
-1. **Participantes:** 5 a 8 personas que entrenen o quieran entrenar (la literatura de usabilidad
-   indica que 5 usuarios detectan la mayoría de problemas de una interfaz). Mayores de edad.
-2. **Consentimiento:** cada participante firma el consentimiento informado (sección 5). Se registran
-   con un código (P01, P02…), no con su nombre.
+1. **Participantes:** 5 a 8 personas adultas que realicen actividad física de manera autónoma
+   (población de la sección 5.2 de la Fase 3).
+2. **Consentimiento:** cada participante firma el consentimiento informado (sección 5). Se identifica
+   con un código anónimo (U01, U02…), nunca con su nombre.
 3. **Equipo:** el teléfono del participante o uno de prueba, con la app desplegada y una cuenta de
-   prueba creada para él.
-4. **Sesión (20 a 30 min):** explicar el objetivo (se evalúa la app, no a la persona); pedir que
-   piense en voz alta; leer cada tarea sin dar pistas; anotar si la completó, el tiempo y los
-   errores; al final, aplicar el cuestionario SUS y dos preguntas abiertas.
-5. **Análisis:** calcular el puntaje SUS por participante y el promedio; listar los problemas
-   observados con su frecuencia y gravedad.
+   prueba creada para él. Se anota modelo de equipo y navegador.
+4. **Sesión (20 a 30 min):** explicar que se evalúa la app y no a la persona; leer cada tarea sin
+   dar pistas; anotar si la completó sin ayuda, el número de ayudas, errores o retrocesos, el tiempo
+   aproximado y la facilidad percibida (1 a 5); al final, aplicar el SUS y dos preguntas abiertas.
+5. **Análisis:** porcentaje de tareas completadas sin ayuda, facilidad media, SUS por participante
+   y media, y lista de problemas observados con su frecuencia.
 
-## 2. Tareas
+**Metas de aceptación de la Fase 3:** al menos 80 % de tareas completadas sin ayuda, facilidad
+media de al menos 4/5 y SUS medio de al menos 70/100.
 
-| # | Tarea (se lee al participante) | Éxito si… | Módulo |
-|---|---|---|---|
-| T1 | "Inicia sesión con la cuenta que te dimos." | Llega al Inicio | Acceso |
-| T2 | "Busca qué te toca entrenar el miércoles." | Abre Entrenar → Semana y lee el día | Entrenar |
-| T3 | "Revisa en el calendario qué días entrenaste el mes pasado." | Navega al mes anterior | Entrenar |
-| T4 | "Busca el ejercicio 'jalón al pecho' y lee su consejo técnico." | Lo abre en Ejercicios | Entrenar |
-| T5 | "Registra que almorzaste 1 taza de arroz blanco." | El alimento aparece en Almuerzo | Nutrición |
-| T6 | "Registra tu peso de hoy: 70 kg." | El peso aparece en Progreso | Progreso |
-| T7 | "Registra que tomaste un vaso de agua de 250 ml." | El total de agua sube 250 ml | Bienestar |
-| T8 | "Pregúntale al asistente qué comer antes de entrenar." | Recibe una respuesta | Mi Claude |
-| T9 | "Cambia tu meta de agua a 3 litros." | La meta queda en 3000 ml | Perfil |
+## 2. Tareas (anexo D.1 de la Fase 3)
 
-Por tarea se registra: completada (sí/no/con ayuda), tiempo en segundos, número de errores y
-observaciones.
+| N.º | Tarea (se lee al participante) | Ruta en FITMAX | Criterio de éxito | Registro |
+|---|---|---|---|---|
+| T1 | "Localiza la rutina que te toca hoy." | Entrenar, vista semanal | Completa la tarea sin ayuda | Sí/No; número de ayudas |
+| T2 | "Abre el calendario, ve al mes anterior y elige un día." | Entrenar, calendario mensual | Cambia de mes y selecciona un día | Sí/No; errores o retrocesos |
+| T3 | "Busca cuántas calorías y proteína llevas hoy." | Nutrición | Identifica calorías y macronutrientes | Facilidad 1–5 |
+| T4 | "Encuentra tu peso y tus medidas." | Progreso | Ubica peso y medidas | Sí/No; tiempo aproximado |
+| T5 | "Registra un vaso de agua." | Bienestar | El registro queda guardado y visible | Pasos completados; observaciones |
+| T6 | "Pregúntale al asistente qué comer antes de entrenar." | Mi Claude | Distingue la respuesta informativa y sus límites | Comentario breve |
 
-## 3. Cuestionario SUS (System Usability Scale)
+Además de lo indicado en "Registro", en cada tarea se anota la facilidad percibida (1 a 5) para
+calcular la facilidad media.
+
+## 3. Cuestionario SUS (anexo D.2 de la Fase 3)
 
 Instrucción: "Marca qué tan de acuerdo estás con cada frase: 1 = totalmente en desacuerdo,
 5 = totalmente de acuerdo. Responde todas, con tu primera impresión."
 
-1. Creo que me gustaría usar esta aplicación con frecuencia.
-2. Encontré la aplicación innecesariamente compleja.
-3. Pensé que la aplicación era fácil de usar.
-4. Creo que necesitaría el apoyo de una persona técnica para poder usar esta aplicación.
-5. Encontré que las diversas funciones de la aplicación estaban bien integradas.
-6. Pensé que había demasiada inconsistencia en la aplicación.
-7. Imagino que la mayoría de las personas aprenderían a usar esta aplicación muy rápidamente.
-8. Encontré la aplicación muy difícil de usar.
-9. Me sentí muy seguro(a) usando la aplicación.
-10. Necesité aprender muchas cosas antes de poder empezar a usar esta aplicación.
+1. Creo que me gustaría usar FITMAX con frecuencia.
+2. Encontré FITMAX innecesariamente complejo.
+3. Pensé que FITMAX era fácil de usar.
+4. Creo que necesitaría ayuda de una persona técnica para poder usar FITMAX.
+5. Encontré que las distintas funciones de FITMAX estaban bien integradas.
+6. Pensé que había demasiada inconsistencia en FITMAX.
+7. Imagino que la mayoría de las personas aprendería a usar FITMAX muy rápidamente.
+8. Encontré FITMAX muy difícil de usar.
+9. Me sentí muy seguro(a) usando FITMAX.
+10. Necesité aprender muchas cosas antes de poder empezar a usar FITMAX.
 
 Preguntas abiertas: ¿Qué fue lo que más te gustó? ¿Qué cambiarías primero?
 
@@ -58,8 +58,8 @@ Preguntas abiertas: ¿Qué fue lo que más te gustó? ¿Qué cambiarías primero
 - Ítems pares (2, 4, 6, 8, 10): aporte = 5 − respuesta.
 - Puntaje SUS = suma de los 10 aportes × 2,5 (rango 0 a 100).
 - Si falta una respuesta, el cuestionario no se puntúa (se reporta como incompleto).
-- Interpretación de referencia (Bangor et al., 2009): el promedio de muchos estudios es cerca de
-  68; por encima de 68 se considera mejor que el promedio.
+- Meta del proyecto (Fase 3): media de al menos 70. Referencia (Bangor et al., 2009): el promedio de
+  muchos estudios es cerca de 68.
 
 Ejemplo de cálculo (no es un resultado): respuestas 4,2,4,1,4,2,5,1,4,2 → impares
 3+3+3+4+3 = 16, pares 3+4+3+4+3 = 17, total 33 × 2,5 = 82,5.

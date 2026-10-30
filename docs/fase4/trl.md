@@ -1,15 +1,18 @@
 # Evaluación del nivel de madurez tecnológica (TRL)
 
-Escala usada: niveles de madurez tecnológica de MinCiencias (basada en la escala TRL de la NASA).
+Escala usada: la misma de la Fase 3 (sección 6.2.3), según las descripciones de TRL de la Comisión
+Europea (European Innovation Council, s. f.): TRL 4 es la validación de la tecnología en laboratorio y
+TRL 5 la validación en un entorno relevante.
 
 | Nivel | Criterio | ¿Se cumple en FITMAX? | Evidencia |
 |---|---|---|---|
-| TRL 3 | Prueba de concepto analítica y experimental de las funciones críticas | Sí | Prototipo funcional de la Fase 3 y versión 2 del 9 de octubre de 2026 |
-| TRL 4 | Validación de componentes integrados en ambiente de laboratorio | **Sí** | Sistema completo (interfaz, API, base de datos, asistente) integrado y probado en ambiente de desarrollo: 61 de 61 pruebas automatizadas aprobadas el 28/10/2026, commit `203984b` (ver `docs/pruebas.md`) |
+| TRL 3 | Prueba de concepto analítica y experimental de las funciones críticas | Sí | Estimado en la Fase 3; prototipo y versión 2 del 9 de octubre de 2026 |
+| TRL 4 | Validación de componentes integrados en ambiente de laboratorio | **Sí** | Sistema completo (interfaz, API, base de datos, asistente) integrado y probado en ambiente de desarrollo: todas las pruebas automatizadas aprobadas (registro del 30/10/2026 en `docs/pruebas.md`) |
 | TRL 5 | Validación de componentes en un ambiente relevante (simulado cercano al real) | **No todavía** | Faltan las condiciones de la tabla siguiente |
 | TRL 6 | Demostración del prototipo en ambiente relevante | No | |
 
-**Nivel alcanzado con evidencia: TRL 4.** El objetivo de la Fase 4 es TRL 5; no se declara
+**Nivel alcanzado con evidencia: TRL 4**, que era la meta propuesta en la Fase 3. La guía de la
+Fase 4 pide un prototipo TRL 5; no se declara
 alcanzado porque las pruebas se hicieron en un contenedor de desarrollo, con navegadores emulados,
 base de datos local y un simulador de la API de Claude.
 

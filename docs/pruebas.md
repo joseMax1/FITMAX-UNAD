@@ -40,7 +40,7 @@ Salidas: `playwright-report/` (reporte HTML), `test-results/resultados.json` (re
 | Campo | Valor |
 |---|---|
 | Fecha y hora | 28 de octubre de 2026, inicio 23:35:43 UTC (18:35 hora Colombia), duración 61 s |
-| Versión | 0.4.0, commit `203984b` |
+| Versión | 0.4.0, commit `1329b81` |
 | Sistema | Linux 6.18 (contenedor de desarrollo en la nube), Node.js 22.22.0 |
 | Base de datos | PostgreSQL 16.15 local, base vacía `fitmax_e2e` creada con `prisma migrate deploy` |
 | Navegador | Chromium 141.0.7390.37 (Playwright 1.56.1), sin interfaz gráfica |
@@ -85,7 +85,7 @@ requiere la API key del equipo (pendiente, ver sección 5).
 
 ## 4. Incidentes y reprueba
 
-Durante la primera ejecución en escritorio (28/10/2026, ~23:27 UTC, antes del commit `7551cfe`)
+Durante la primera ejecución en escritorio (28/10/2026, ~23:27 UTC, antes del commit `31a5679`)
 fallaron 3 casos. Ninguno era un defecto de la app; se corrigieron y se volvieron a ejecutar:
 
 | Caso | Qué falló | Causa | Corrección | Reprueba |

@@ -1,6 +1,6 @@
 # Verificación final y lista de chequeo (Fase 4)
 
-Fecha: 28 de octubre de 2026. Versión 0.4.0. Código probado: commit `203984b` (los commits
+Fecha: 28 de octubre de 2026. Versión 0.4.0. Código probado: commit `1329b81` (los commits
 posteriores solo agregan documentación).
 
 ## Verificación ejecutada (instalación limpia)

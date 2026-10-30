@@ -1,7 +1,8 @@
 # Diagnóstico técnico de FITMAX (Fase 4)
 
 Fecha de la auditoría: 28 de octubre de 2026. Base auditada: versión entregada el 9 de octubre de
-2026 (commit `42f8284`). Versión resultante: 0.4.0 (commit `203984b`).
+2026 (commit `2718196`). Versión resultante: 0.4.0 (commit `1329b81`). Actualizado el 30 de octubre de 2026 con la versión 0.4.1
+(fotos de progreso y prueba del modo entrenamiento por interfaz).
 
 Método: revisión del código de las 16 rutas de API, 9 pantallas, middleware, esquema de datos y
 Service Worker; `npm audit`; `tsc`; ESLint; ejecución de la app contra PostgreSQL y pruebas
@@ -17,10 +18,12 @@ automatizadas en navegador.
 | Protección de rutas y APIs privadas | CP-02 |
 | Perfil y metas personalizadas | CP-03 |
 | Rutina semanal editable | CP-04 |
+| Modo entrenamiento: registrar series, descanso, terminar y guardar la sesión | CP-04b |
 | Calendario mensual de entrenamientos | CP-05 |
 | Biblioteca de ejercicios con búsqueda y filtro | CP-06 |
 | Registro de comidas y totales del día | CP-07 |
 | Peso, medidas corporales e historial | CP-08 |
+| Fotos de progreso (RF-08): subir, ver, borrar; solo el dueño accede | CP-08, CP-12 |
 | Hidratación y check-in de recuperación | CP-09 |
 | Flujo del asistente y manejo de errores (con simulador) | CP-10 |
 | Diseño adaptable escritorio y móvil (emulado) | CP-11 |
@@ -32,7 +35,6 @@ automatizadas en navegador.
 | Funcionalidad | Qué falta |
 |---|---|
 | Respuesta real de Claude | Prueba con la API key del equipo |
-| Modo entrenamiento (cronómetro, series, terminar sesión) | Prueba por interfaz; hoy el guardado se prueba por API |
 | Gráficas de fuerza y volumen, anillos del dashboard | Prueba de los valores mostrados |
 | PWA instalable y Service Worker | Instalación en teléfonos reales |
 | Despliegue Vercel + Neon | Ejecución en la nube del equipo |
@@ -51,7 +53,7 @@ automatizadas en navegador.
 **D. No implementado**
 
 Módulo de administrador y roles, recuperación de contraseña, notificaciones push, sincronización
-sin conexión, integración con relojes o bandas, fotos de progreso, auditoría formal de
+sin conexión, integración con relojes o bandas, auditoría formal de
 accesibilidad (WCAG) y evaluación de usabilidad con participantes.
 
 ## 2. Problemas encontrados y corregidos en la Fase 4
@@ -60,8 +62,8 @@ Severidad: Crítica (explotable de forma remota o pérdida de datos), Alta, Medi
 
 | # | Problema | Archivo | Severidad | Efecto | Corrección | Evidencia |
 |---|---|---|---|---|---|---|
-| 1 | Next.js 14.2.35 con avisos de seguridad críticos (ejecución remota de código en el optimizador de imágenes, SSRF, denegación de servicio, envenenamiento de caché); la rama 14 ya no recibe parches | `package.json` | Crítica | Riesgo de compromiso del servidor | Actualización controlada a Next 15.5.28 y React 19.2.8 (no se actualizaron todos los paquetes); `postcss` anidado forzado a 8.5.32 | `npm audit`: 0 vulnerabilidades; build y 61 pruebas aprobadas. Commit `227b646` |
-| 2 | No existía `.gitignore` | raíz | Alta | Riesgo de subir `.env` con claves a GitHub | `.gitignore` que excluye `.env*` (salvo `.env.example`), `node_modules`, `.next`, reportes | Commit `227b646` |
+| 1 | Next.js 14.2.35 con avisos de seguridad críticos (ejecución remota de código en el optimizador de imágenes, SSRF, denegación de servicio, envenenamiento de caché); la rama 14 ya no recibe parches | `package.json` | Crítica | Riesgo de compromiso del servidor | Actualización controlada a Next 15.5.28 y React 19.2.8 (no se actualizaron todos los paquetes); `postcss` anidado forzado a 8.5.32 | `npm audit`: 0 vulnerabilidades; build y 61 pruebas aprobadas. Commit `eb164f4` |
+| 2 | No existía `.gitignore` | raíz | Alta | Riesgo de subir `.env` con claves a GitHub | `.gitignore` que excluye `.env*` (salvo `.env.example`), `node_modules`, `.next`, reportes | Commit `eb164f4` |
 | 3 | Sin límite de intentos en login y registro | `lib/auth.ts`, `app/api/register/route.ts` | Alta | Fuerza bruta de contraseñas y registros masivos | 10 intentos/15 min por IP y correo; 5 registros/hora por IP; bcrypt costo 12 | Prueba unitaria "límite de intentos" |
 | 4 | Contraseña mínima de 6 caracteres | `lib/validacion.ts`, `app/register/page.tsx` | Media | Contraseñas débiles | Mínimo 8, máximo 72 (límite de bcrypt) en servidor e interfaz | CP-01c |
 | 5 | Validación manual e incompleta de entradas; tipos `any` | APIs de registro, perfil, peso, entrenamientos, rutinas | Media | Datos fuera de rango o corruptos | Esquemas zod en el servidor con mensajes por campo | CP-03, CP-04, CP-08, pruebas unitarias |
@@ -76,6 +78,8 @@ Severidad: Crítica (explotable de forma remota o pérdida de datos), Alta, Medi
 | 14 | Sin migraciones versionadas (solo `db push`) | `prisma/` | Baja | Instalación no reproducible | Migración base `0_init` verificada en base vacía | `prisma migrate deploy` + `migrate diff` sin diferencias |
 | 15 | Sin pruebas automatizadas | raíz | Media | Regresiones sin detectar | 17 unitarias + CP-01 a CP-12 en dos dispositivos | `docs/pruebas.md` |
 | 16 | Pestañas y escalas sin semántica accesible | `components/Tabs.tsx`, `BienestarClient.tsx`, `IAClient.tsx` | Baja | Lectores de pantalla no las anuncian | `role="tab"`, `aria-selected`, `role="group"`, etiqueta "Enviar" | CP-04, CP-09, CP-10 |
+| 17 | Fotos de progreso (RF-08 de la Fase 3) no estaban implementadas | nuevo `app/api/fotos/*`, `app/progreso/Fotos.tsx`, migración `1_fotos_progreso` | Media | Requisito de la Fase 3 sin cubrir | Subida con verificación del tipo real del archivo (JPEG, PNG, WebP), reducción a 1080 px en el navegador (elimina metadatos EXIF como la ubicación), máximo 1,5 MB y 60 fotos, acceso solo del dueño, `no-store`; no se envían al asistente; se borran con la cuenta | CP-08, CP-12 |
+| 18 | El historial de Git registraba un correo personal como autor | `.git` | Baja | Dato personal visible al publicar el repositorio | Historial local (no publicado) reescrito con un autor genérico `Equipo FITMAX <equipo-fitmax@example.invalid>` | `git log --format='%an %ae'` |
 
 ## 3. Riesgos que siguen abiertos
 
@@ -84,3 +88,12 @@ Severidad: Crítica (explotable de forma remota o pérdida de datos), Alta, Medi
    (Neon: Reset password; Anthropic: revocar y crear una nueva key) antes de publicar o entregar.
 2. Límite de intentos por instancia (categoría C).
 3. Respuesta real del modelo sin prueba (categoría B).
+
+## 4. Cambios frente a lo previsto en la Fase 3
+
+| Fase 3 | Estado actual | Justificación |
+|---|---|---|
+| Next.js 14 y React 18 (sección 5.4) | Next.js 15.5.28 y React 19.2.8 | La rama 14 tenía avisos de seguridad críticos sin parche (problema 1) |
+| Proveedores de IA Anthropic y Google Gemini (sección 5.4) | Solo Anthropic (Claude) | Decisión del equipo del 9 de octubre de 2026 de usar su propia cuenta de Claude; un solo proveedor reduce los datos compartidos con terceros (RNF-06). Gemini no está implementado |
+| RF-12 Restringir administración | No existe rol de administrador; CP-12 prueba el aislamiento entre usuarios | Sin módulo de administración no hay función que restringir; el riesgo equivalente es que un usuario acceda a datos de otro |
+| RF-08 Consultar fotos de progreso | Implementado el 30/10/2026 | Problema 17 |
