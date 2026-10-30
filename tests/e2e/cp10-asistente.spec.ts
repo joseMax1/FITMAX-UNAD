@@ -16,6 +16,7 @@ test("CP-10 consulta al asistente con respuesta, rechazo y error de API key", as
   await campo.fill("¿Qué entreno hoy?");
   await page.getByRole("button", { name: "Enviar" }).click();
   await expect(page.getByText("Hola, hoy toca entrenar fuerte.")).toBeVisible();
+  await expect(page.getByText(/No recibe tu nombre, correo ni fotos/)).toBeVisible();
   // La pregunta y la respuesta se guardan al cerrar el stream: se espera a que queden en el historial.
   await expect.poll(async () => (await (await page.request.get("/api/chat")).json()).length).toBe(2);
   await page.reload();

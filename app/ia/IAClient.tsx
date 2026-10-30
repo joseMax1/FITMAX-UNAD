@@ -103,6 +103,10 @@ export default function IAClient({ initialMessages }: { initialMessages: Msg[] }
           placeholder="Pregúntale a Claude…" className="flex-1 px-3 py-2 rounded-lg bg-card2 border border-border" />
         <button onClick={enviar} aria-label="Enviar" disabled={sending || !input.trim()} className="px-4 rounded-lg text-white font-bold bg-accent disabled:opacity-40"><Send size={16} /></button>
       </div>
+      <p className="text-[11px] text-sub -mt-2 mb-4">
+        Para personalizar, Claude recibe tu sexo, edad, peso, estatura, objetivo, rutina y los registros de hoy.
+        No recibe tu nombre, correo ni fotos. Sus respuestas son orientativas y no reemplazan a un profesional de la salud.
+      </p>
     </div>
   );
 }
