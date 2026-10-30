@@ -1,7 +1,9 @@
 # FITMAX
 
 Aplicación web progresiva (PWA) de entrenamiento, nutrición, progreso y bienestar, con un asistente
-basado en Claude (Anthropic). Proyecto de grado, Fase 4. Versión 0.4.0.
+basado en Claude (Anthropic). Proyecto de grado UNAD (Ingeniería de Sistemas), Fase 4. Versión 0.4.1.
+
+Integrantes: Maximiliano José de León Cera y Fabián Enrique Herrera Zabala.
 
 > Este repositorio **no contiene secretos**. Las credenciales van en un archivo `.env` local que
 > Git ignora. Usa `.env.example` como plantilla.
@@ -12,9 +14,9 @@ basado en Claude (Anthropic). Proyecto de grado, Fase 4. Versión 0.4.0.
 |---|---|---|
 | Acceso | `/login`, `/register` | Registro e inicio de sesión con correo y contraseña (mínimo 8 caracteres, bcrypt, límite de intentos) |
 | Inicio | `/dashboard` | Rutina de hoy, metas del día (entrenos, kcal, proteína, agua), racha, peso, nivel, recuperación |
-| Entrenar | `/entrenar` | Semana, calendario mensual, editor de rutina, biblioteca de 30 ejercicios con búsqueda y filtro, modo entrenamiento |
+| Entrenar | `/entrenar` | Semana, calendario mensual, editor de rutina, biblioteca de 30 ejercicios con búsqueda y filtro, modo entrenamiento con series y descanso |
 | Nutrición | `/nutricion` | Registro de comidas por día y tipo, 70 alimentos colombianos, alimentos propios, totales frente a la meta |
-| Progreso | `/progreso` | Peso, medidas corporales, fuerza (1RM estimado), volumen semanal e historial |
+| Progreso | `/progreso` | Peso, medidas corporales, fotos de progreso privadas, fuerza (1RM estimado), volumen semanal e historial |
 | Bienestar | `/bienestar` | Hidratación y check-in diario de sueño, energía, estrés y dolor con puntaje de recuperación |
 | Mi Claude | `/ia` y botón flotante | Chat en tiempo real con contexto de la rutina, comidas, agua y descanso del día |
 | Perfil | `/perfil` | Datos, metas, descarga de mis datos (JSON) y eliminación de la cuenta |
@@ -35,10 +37,11 @@ Next.js 15 (Node.js)
 Prisma ORM ──► PostgreSQL (Neon en producción)
 ```
 
-- **Datos:** 15 modelos (`prisma/schema.prisma`). Los registros diarios usan la fecha `YYYY-MM-DD`
+- **Datos:** 16 modelos (`prisma/schema.prisma`). Los registros diarios usan la fecha `YYYY-MM-DD`
   en la zona `APP_TZ` (Colombia por defecto).
 - **Privacidad:** el asistente recibe solo los datos necesarios para personalizar (sin nombre, correo
-  ni identificadores). El Service Worker solo guarda archivos estáticos, nunca respuestas de la API.
+  ni identificadores) y nunca recibe las fotos. Las fotos se reducen en el navegador (sin metadatos de
+  ubicación), se valida su tipo real en el servidor y solo su dueño puede verlas. El Service Worker solo guarda archivos estáticos, nunca respuestas de la API.
 - **Seguridad:** cabeceras HTTP (nosniff, frame-ancestors, Referrer-Policy, Permissions-Policy,
   HSTS), `Cache-Control: no-store` en la API, límite de intentos en login, registro, chat y borrado
   de cuenta.
@@ -66,7 +69,7 @@ Copia `.env.example` a `.env` y complétalo:
 
 ```bash
 npm ci                    # instala exactamente las versiones del package-lock.json
-npm run db:migrate        # crea las tablas (prisma migrate deploy)
+npm run db:migrate        # crea las tablas (migraciones 0_init y 1_fotos_progreso)
 npm run dev               # desarrollo en http://localhost:3000
 # o en modo producción:
 npm run build && npm start
@@ -85,12 +88,12 @@ las tablas y abre el navegador.
 npm run typecheck         # TypeScript sin errores
 npm run lint              # ESLint (next/core-web-vitals + next/typescript)
 npm test                  # 17 pruebas unitarias (no necesitan base de datos)
-npm run test:e2e          # CP-01 a CP-12 en escritorio y móvil (ver docs/pruebas.md)
+npm run test:e2e          # CP-01 a CP-12 (y CP-04b) en escritorio y móvil (ver docs/pruebas.md)
 ```
 
 Las pruebas de punta a punta necesitan la app corriendo contra una base de datos **de prueba** y el
 servidor simulado de Anthropic (`npm run mock:ia`), de modo que no se gasta ni se expone una API key
-real. El procedimiento completo, la matriz de casos y el último registro de ejecución están en
+real. Último registro: 30/10/2026, 63 de 63 pruebas aprobadas. El procedimiento completo, la matriz de casos y el último registro de ejecución están en
 [`docs/pruebas.md`](docs/pruebas.md).
 
 | Caso | Qué se comprueba |
@@ -99,14 +102,15 @@ real. El procedimiento completo, la matriz de casos y el último registro de eje
 | CP-02 | Rutas y APIs privadas sin sesión (redirección y 401) |
 | CP-03 | Editar, guardar y recuperar el perfil; validación de rangos en el servidor |
 | CP-04 | Configurar la rutina semanal y verla en la semana |
+| CP-04b | Registrar una sesión completa en el modo entrenamiento |
 | CP-05 | Navegar el calendario por meses y ver un entrenamiento |
 | CP-06 | Buscar (sin tildes) y filtrar ejercicios |
 | CP-07 | Registrar un alimento y ver los totales del día |
-| CP-08 | Registrar peso y medidas y verlos en el historial |
+| CP-08 | Registrar peso, medidas y una foto de progreso y verlos en el historial |
 | CP-09 | Hidratación y check-in de bienestar |
 | CP-10 | Asistente: respuesta, rechazo, API key inválida, sin API key, datos enviados |
 | CP-11 | Pantallas en escritorio (1280×720) y móvil (Pixel 7) sin desbordes |
-| CP-12 | Aislamiento entre usuarios (no hay módulo de administrador; ver docs/pruebas.md) |
+| CP-12 | Aislamiento entre usuarios, incluidas las fotos (no hay módulo de administrador; ver docs/pruebas.md) |
 
 ## Estructura
 
@@ -119,6 +123,20 @@ public/         manifest, íconos y Service Worker
 tests/          unitarias, e2e (Playwright) y simulador de Anthropic
 docs/           diagnóstico, pruebas y documentación de la Fase 4
 ```
+
+## Documentación de la Fase 4
+
+| Documento | Contenido |
+|---|---|
+| [`docs/fase4/diagnostico.md`](docs/fase4/diagnostico.md) | Estado por módulo, problemas corregidos y cambios frente a la Fase 3 |
+| [`docs/fase4/metodologia-cdio.md`](docs/fase4/metodologia-cdio.md) | Scrum + CDIO: roles, Definición de Terminado e incrementos |
+| [`docs/pruebas.md`](docs/pruebas.md) | Procedimiento y registro de ejecución de las pruebas |
+| [`docs/fase4/matriz-trazabilidad.xlsx`](docs/fase4/matriz-trazabilidad.xlsx) | RF-01 a RF-12 y RNF-01 a RNF-07 → caso de prueba → evidencia |
+| [`docs/fase4/usabilidad-sus.md`](docs/fase4/usabilidad-sus.md) | Tareas T1 a T6, cuestionario SUS y consentimiento (sin aplicar) |
+| [`docs/fase4/trl.md`](docs/fase4/trl.md) | Nivel TRL con evidencia (TRL 4) y brecha para TRL 5 |
+| [`docs/fase4/github.md`](docs/fase4/github.md) | Cómo publicar el repositorio sin secretos |
+| [`docs/fase4/guion-video.md`](docs/fase4/guion-video.md) | Guion del video de demostración (máximo 10 minutos) |
+| [`docs/fase4/verificacion-final.md`](docs/fase4/verificacion-final.md) | Verificación final y lista de chequeo |
 
 ## Despliegue (Vercel + Neon)
 
@@ -136,6 +154,8 @@ docs/           diagnóstico, pruebas y documentación de la Fase 4
 - No hay recuperación de contraseña por correo ni verificación de correo.
 - Los valores nutricionales son aproximados (tablas USDA e ICBF) y la app no reemplaza a un
   profesional de la salud.
+- Nivel de madurez demostrado: TRL 4 (laboratorio). Falta la validación en un entorno relevante
+  (despliegue, API real, teléfonos y usuarios) para TRL 5; ver `docs/fase4/trl.md`.
 - La respuesta real de Claude no está cubierta por las pruebas automáticas (se usa un simulador).
 - En escritorio la interfaz se muestra como una columna centrada (diseño pensado primero para móvil).
 
