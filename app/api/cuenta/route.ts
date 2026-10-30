@@ -23,6 +23,8 @@ export async function GET() {
       waterLogs: true,
       wellness: true,
       chatMessages: true,
+      // Las imágenes no se incluyen en el JSON; se descargan una a una desde /api/fotos/:id.
+      photos: { select: { id: true, fecha: true, nota: true, bytes: true, createdAt: true } },
     },
   });
   if (!datos) return noAutenticado();

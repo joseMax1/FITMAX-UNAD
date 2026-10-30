@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from "recharts";
 import { Plus, Trash2 } from "lucide-react";
 import Tabs from "@/components/Tabs";
+import Fotos from "./Fotos";
 
 type Medida = { id: string; fecha: string; cintura: number | null; cadera: number | null; pecho: number | null; brazo: number | null; muslo: number | null; cuello: number | null; grasaPct: number | null };
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
   volumen: { semana: string; kg: number }[];
   historial: { dia: string; fecha: string; duracionMin: number | null; series: number; ejercicios: string[] }[];
 };
-type Tab = "peso" | "medidas" | "fuerza" | "volumen" | "historial";
+type Tab = "peso" | "medidas" | "fotos" | "fuerza" | "volumen" | "historial";
 
 const EJE = { fontSize: 10, fill: "#8B909C" };
 const TOOLTIP = { contentStyle: { background: "#20232A", border: "1px solid #2B2E36", borderRadius: 8 }, labelStyle: { color: "#8B909C" } };
@@ -39,11 +40,12 @@ export default function ProgresoClient(p: Props) {
   return (
     <div className="space-y-4">
       <Tabs<Tab> value={tab} onChange={setTab} tabs={[
-        { id: "peso", label: "Peso" }, { id: "medidas", label: "Medidas" }, { id: "fuerza", label: "Fuerza" },
+        { id: "peso", label: "Peso" }, { id: "medidas", label: "Medidas" }, { id: "fotos", label: "Fotos" }, { id: "fuerza", label: "Fuerza" },
         { id: "volumen", label: "Volumen" }, { id: "historial", label: "Historial" },
       ]} />
       {tab === "peso" && <Peso logs={p.weightLogs} objetivo={p.pesoObjetivo} />}
       {tab === "medidas" && <Medidas medidas={p.medidas} />}
+      {tab === "fotos" && <Fotos />}
       {tab === "fuerza" && <Fuerza fuerza={p.fuerza} />}
       {tab === "volumen" && <Volumen volumen={p.volumen} />}
       {tab === "historial" && <HistorialTab historial={p.historial} />}

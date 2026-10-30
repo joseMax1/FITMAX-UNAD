@@ -54,6 +54,23 @@ test("CP-08 registrar peso y medidas y verlos en el historial", async ({ page },
   await expect(page.getByText("Cintura 72cm · % grasa 24.5%")).toBeVisible();
   await evidencia(page, info, "CP-08-medidas-historial");
 
+  // Fotos de progreso (RF-08): subir una imagen sintética, verla y borrarla.
+  await page.getByRole("tab", { name: "Fotos" }).click();
+  await page.getByPlaceholder("Nota (opcional)").fill("Semana 1");
+  await page.getByLabel("Elegir foto de progreso").setInputFiles("tests/fixtures/foto-prueba.jpg");
+  await expect(page.getByText("Foto guardada ✓")).toBeVisible();
+  const img = page.getByRole("img", { name: /Foto de progreso del/ });
+  await expect(img).toHaveCount(1);
+  await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+  await expect(page.getByText("Semana 1")).toBeVisible();
+  await evidencia(page, info, "CP-08-foto-de-progreso");
+  // Un archivo que no es imagen se rechaza en el servidor aunque diga ser JPEG.
+  const falso = await page.request.post("/api/fotos", { data: { imagen: "data:image/jpeg;base64," + Buffer.from("no soy una imagen").toString("base64") } });
+  expect(falso.status()).toBe(400);
+  page.once("dialog", (d) => d.accept());
+  await page.getByRole("button", { name: "Borrar foto" }).click();
+  await expect(page.getByText("Aún no tienes fotos de progreso.")).toBeVisible();
+
   // El perfil queda con el último peso.
   expect((await (await page.request.get("/api/profile")).json()).peso).toBe(61);
 });

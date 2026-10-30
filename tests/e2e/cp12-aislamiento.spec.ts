@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import fs from "node:fs";
 import { prisma } from "@/lib/prisma";
 import { crearUsuario, iniciarSesion } from "./utilidades";
 
@@ -21,7 +22,16 @@ test("CP-12 un usuario no accede a los datos de otro ni a rutas administrativas"
   const ejercicio = await (await pa.request.post("/api/ejercicios", { data: { nombre: "Ejercicio privado A", grupo: "Pecho" } })).json();
   const medida = await (await pa.request.post("/api/medidas", { data: { cintura: 70 } })).json();
   const agua = await (await pa.request.post("/api/agua", { data: { ml: 300 } })).json();
-  expect([alimento.id, item.id, ejercicio.id, medida.id, agua.id].every(Boolean)).toBe(true);
+  const imagen = "data:image/jpeg;base64," + fs.readFileSync("tests/fixtures/foto-prueba.jpg").toString("base64");
+  const foto = await (await pa.request.post("/api/fotos", { data: { imagen, nota: "Foto privada A" } })).json();
+  expect([alimento.id, item.id, ejercicio.id, medida.id, agua.id, foto.id].every(Boolean)).toBe(true);
+  expect((await pa.request.get(`/api/fotos/${foto.id}`)).headers()["content-type"]).toBe("image/jpeg");
+
+  // B no puede ver, listar ni borrar la foto de A.
+  expect((await pb.request.get(`/api/fotos/${foto.id}`)).status()).toBe(404);
+  expect(JSON.stringify(await (await pb.request.get("/api/fotos")).json())).not.toContain(foto.id);
+  expect((await pb.request.delete(`/api/fotos?id=${foto.id}`)).status()).toBe(404);
+  expect(await prisma.progressPhoto.count({ where: { id: foto.id } })).toBe(1);
 
   // B intenta borrar los registros de A: 404 y los datos siguen intactos.
   expect((await pb.request.delete(`/api/comidas?itemId=${item.id}`)).status()).toBe(404);
@@ -46,7 +56,7 @@ test("CP-12 un usuario no accede a los datos de otro ni a rutas administrativas"
   // La exportación de B solo contiene datos de B.
   const exportB = await (await pb.request.get("/api/cuenta")).text();
   expect(exportB).toContain(b.email);
-  for (const dato of [a.email, a.id, "Arepa privada A", "Ejercicio privado A"]) expect(exportB).not.toContain(dato);
+  for (const dato of [a.email, a.id, "Arepa privada A", "Ejercicio privado A", "Foto privada A"]) expect(exportB).not.toContain(dato);
   expect(exportB).not.toContain("passwordHash");
 
   // No hay rutas administrativas expuestas.

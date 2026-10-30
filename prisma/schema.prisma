@@ -51,6 +51,7 @@ model User {
   measurements  BodyMeasurement[]
   waterLogs     WaterLog[]
   wellness      WellnessLog[]
+  photos        ProgressPhoto[]
 }
 
 // ─────────────────────────── Entrenamiento ───────────────────────────
@@ -241,6 +242,22 @@ model BodyMeasurement {
   grasaPct  Float?
 
   @@index([userId, date])
+}
+
+/// Foto de progreso. La imagen se guarda en la base (máx. ~1 MB, reducida en el navegador) y solo
+/// la puede leer su dueño. Nunca se envía al asistente de IA.
+model ProgressPhoto {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fecha     String   // "YYYY-MM-DD" en APP_TZ
+  mime      String
+  bytes     Int
+  data      Bytes
+  nota      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, fecha])
 }
 
 // ───────────────────────────── Bienestar ─────────────────────────────

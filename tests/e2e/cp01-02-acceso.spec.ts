@@ -51,7 +51,7 @@ test.describe("CP-02 Rutas privadas sin sesión", () => {
     const casos: [string, string][] = [
       ["GET", "/api/profile"], ["GET", "/api/resumen"], ["GET", "/api/comidas"], ["GET", "/api/workouts"],
       ["GET", "/api/medidas"], ["GET", "/api/agua"], ["GET", "/api/bienestar"], ["GET", "/api/chat"],
-      ["POST", "/api/chat"], ["GET", "/api/cuenta"], ["DELETE", "/api/cuenta"], ["PUT", "/api/rutinas"],
+      ["POST", "/api/chat"], ["GET", "/api/fotos"], ["GET", "/api/fotos/x"], ["GET", "/api/cuenta"], ["DELETE", "/api/cuenta"], ["PUT", "/api/rutinas"],
     ];
     for (const [metodo, ruta] of casos) {
       const r = await request.fetch(ruta, { method: metodo, data: metodo === "GET" ? undefined : {} });
