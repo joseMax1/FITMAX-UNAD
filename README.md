@@ -21,6 +21,17 @@ Integrantes: Maximiliano José de León Cera y Fabián Enrique Herrera Zabala.
 | Mi Claude | `/ia` y botón flotante | Chat en tiempo real con contexto de la rutina, comidas, agua y descanso del día |
 | Perfil | `/perfil` | Datos, metas, descarga de mis datos (JSON) y eliminación de la cuenta |
 
+## Tecnologías
+
+| Capa | Tecnología |
+|---|---|
+| Interfaz | Next.js 15.5 (App Router), React 19.2, Tailwind CSS 3, Recharts, PWA (manifest + Service Worker) |
+| Servidor | API REST de Next.js en Node.js 20.9+, validación con zod 4 |
+| Autenticación | NextAuth 4 (JWT, credenciales), bcrypt |
+| Datos | Prisma 5.22, PostgreSQL 14+ (Neon en producción) |
+| Asistente | SDK oficial de Anthropic (`@anthropic-ai/sdk`), respuestas en streaming |
+| Calidad | TypeScript, ESLint 9, Playwright 1.56 (unitarias y de punta a punta) |
+
 ## Arquitectura
 
 ```
@@ -140,12 +151,36 @@ docs/           diagnóstico, pruebas y documentación de la Fase 4
 
 ## Despliegue (Vercel + Neon)
 
-1. Crea la base en Neon y copia su cadena de conexión.
-2. Importa el repositorio en Vercel y define `DATABASE_URL`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL` y,
-   si se usará el chat, `ANTHROPIC_API_KEY`.
-3. Desde tu equipo, con el `.env` apuntando a esa base, ejecuta `npm run db:migrate`.
-4. La app se instala en el teléfono desde el navegador (Android: menú, "Instalar app"; iPhone:
-   compartir, "Añadir a pantalla de inicio").
+1. **Base de datos:** en Neon, crea la base (o usa la existente) y copia su cadena de conexión.
+   Úsala solo en Vercel y en tu `.env` local; nunca la subas al repositorio ni la pegues en chats.
+2. **Proyecto:** en Vercel, *Add New → Project* e importa este repositorio. El comando de build
+   (`prisma generate && next build`) ya está en `package.json`.
+3. **Variables de entorno** (*Settings → Environment Variables*, para Production y Preview):
+
+   | Variable | Obligatoria | Valor |
+   |---|---|---|
+   | `DATABASE_URL` | Sí | Cadena de conexión de Neon (con `sslmode=require`) |
+   | `NEXTAUTH_SECRET` | Sí | Nuevo valor aleatorio (`openssl rand -hex 32`), distinto del local |
+   | `NEXTAUTH_URL` | Sí | URL pública del despliegue, por ejemplo `https://<proyecto>.vercel.app` |
+   | `ANTHROPIC_API_KEY` | Para el chat | API key de Anthropic |
+   | `ANTHROPIC_MODEL` | No | Modelo de Claude (por defecto `claude-opus-5-5`) |
+   | `APP_TZ` | No | Zona horaria (por defecto `America/Bogota`) |
+
+   **No definas `ANTHROPIC_BASE_URL`** en producción: solo se usa para apuntar al simulador de pruebas.
+4. **Migraciones:** desde tu equipo, con `DATABASE_URL` apuntando a Neon, revisa primero las
+   diferencias y luego aplica:
+   ```bash
+   npx prisma migrate status
+   # Base creada antes con "prisma db push": compara su esquema con la migración base
+   npx prisma migrate diff --from-url "$DATABASE_URL" --to-migrations prisma/migrations --shadow-database-url <base-vacía> --script
+   # Si no hay diferencias con 0_init: npx prisma migrate resolve --applied 0_init
+   npm run db:migrate
+   ```
+   Nunca uses `prisma migrate reset` ni `db push --force-reset` sobre la base de producción.
+5. **Verificación:** abre la URL, regístrate, prueba cada módulo y el chat. Para repetir las pruebas
+   automáticas contra el despliegue usa una base de prueba, no la de producción (ver `docs/pruebas.md`).
+6. **Instalar en el teléfono:** Android, menú → "Instalar app"; iPhone, compartir → "Añadir a pantalla
+   de inicio".
 
 ## Limitaciones conocidas
 
